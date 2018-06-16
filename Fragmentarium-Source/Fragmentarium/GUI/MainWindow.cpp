@@ -13,6 +13,7 @@
 #include <QDialogButtonBox>
 #include <QButtonGroup>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDialog>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -571,10 +572,103 @@ void MainWindow::init()
     int i = settings.value("refreshRate", 20).toInt();
     fmt.setSwapInterval(i);
 
+    int vers = settings.value ("glVersion", 0).toInt();
+    int prof = settings.value ("glProfile", 0).toInt();
+
+    if(vers > 0) { 
+
+        int glvmaj=0, glvmin=0;
+        uint32_t wantedGLVersion = (1 << (vers-1));
+        switch(wantedGLVersion) {
+            case QGLFormat::OpenGL_Version_None               : glvmaj=0; glvmin=0; break;
+            case QGLFormat::OpenGL_Version_1_1                : glvmaj=1; glvmin=1; break;
+            case QGLFormat::OpenGL_Version_1_2                : glvmaj=1; glvmin=2; break;
+            case QGLFormat::OpenGL_Version_1_3                : glvmaj=1; glvmin=3; break;
+            case QGLFormat::OpenGL_Version_1_4                : glvmaj=1; glvmin=4; break;
+            case QGLFormat::OpenGL_Version_1_5                : glvmaj=1; glvmin=5; break;
+            case QGLFormat::OpenGL_Version_2_0                : glvmaj=2; glvmin=0; break;
+            case QGLFormat::OpenGL_Version_2_1                : glvmaj=2; glvmin=1; break;
+            case QGLFormat::OpenGL_ES_Common_Version_1_0      : glvmaj=0; glvmin=0; break;
+            case QGLFormat::OpenGL_ES_CommonLite_Version_1_0  : glvmaj=0; glvmin=0; break;
+            case QGLFormat::OpenGL_ES_Common_Version_1_1      : glvmaj=0; glvmin=0; break;
+            case QGLFormat::OpenGL_ES_CommonLite_Version_1_1  : glvmaj=0; glvmin=0; break;
+            case QGLFormat::OpenGL_ES_Version_2_0             : glvmaj=0; glvmin=0; break;
+            case QGLFormat::OpenGL_Version_3_0                : glvmaj=3; glvmin=0; break;
+            case QGLFormat::OpenGL_Version_3_1                : glvmaj=3; glvmin=1; break;
+            case QGLFormat::OpenGL_Version_3_2                : glvmaj=3; glvmin=2; break;
+            case QGLFormat::OpenGL_Version_3_3                : glvmaj=3; glvmin=3; break;
+            case QGLFormat::OpenGL_Version_4_0                : glvmaj=4; glvmin=0; break;
+            case QGLFormat::OpenGL_Version_4_1                : glvmaj=4; glvmin=1; break;
+            case QGLFormat::OpenGL_Version_4_2                : glvmaj=4; glvmin=2; break;
+            case QGLFormat::OpenGL_Version_4_3                : glvmaj=4; glvmin=3; break;
+
+        }
+        // report the requested version then set it
+        qDebug()<< QString("GL vers %1.%2 requested.").arg(glvmaj).arg(glvmin);
+        fmt.setVersion(glvmaj, glvmin);
+    } else qDebug()<< QString("GL vers None requested.");
+
+    // report the requested profile then set it    
+    qDebug()<< QString("GL prof %1 requested.").arg( prof==0 ? "None" : prof == 1 ? "Core" : prof == 2 ? "Compatability" : "oops");
+    fmt.setProfile((QGLFormat::OpenGLContextProfile)prof);
+
     engine = new DisplayWidget(fmt, this, splitter);
     engine->makeCurrent();
     engine->show();
-    if(!engine->init()) CRITICAL(tr("Engine failed to start!"));
+    // report the version and profile that was actually created in the engine
+    qDebug() << QString("GL vers %1.%2 used.").arg(engine->context()->format().majorVersion()).arg(engine->context()->format().minorVersion());
+    prof = engine->context()->format().profile();
+    qDebug() << QString("GL prof %1 used.").arg(prof==0 ? "None" : prof == 1 ? "Core" : prof == 2 ? "Compatability" : "oops");
+
+    if( engine->context()->getProcAddress("glGenerateMipmap") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glGenerateMipmap() failed in engine, GL v3.0+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glGetProgramiv") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glGetProgramiv() failed in engine, GL v2.0+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glGetActiveUniform") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glGetActiveUniform() failed in engine, GL v2.0+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glCheckFramebufferStatus") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glCheckFramebufferStatus() failed in engine, GL v3.0+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glBindFramebuffer") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glBindFramebuffer() failed in engine, GL v3.0+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glGetUniformLocation") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glGetUniformLocation() failed in engine, GL v2.0+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glGetProgramBinary") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glGetProgramBinary() failed in engine, GL v4.1+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glUniform1d") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glUniform1d() failed in engine, GL v4.1+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glUniform2d") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glUniform2d() failed in engine, GL v4.1+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glUniform3d") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glUniform3d() failed in engine, GL v4.1+ required\n";
+//         exit(0);
+    }   
+    if( engine->context()->getProcAddress("glUniform4d") == 0) {
+        qDebug() << "Warning!!! OpenGLFunction glUniform4d() failed in engine, GL v4.1+ required\n";
+//         exit(0);
+    }   
+
+    if(!engine->init()) {
+        qDebug() << "Warning!!! initializeOpenGLFunctions() failed in engine\n";
+        exit(0);
+    } else {
     engine->updateRefreshRate();
 
     tabBar = new QTabBar(this);
@@ -674,6 +768,8 @@ void MainWindow::init()
             msgBox.exec();
             if (msgBox.clickedButton() == b) {
                 settings.setValue("autorun", false);
+                settings.setValue("glVersion", 0);
+                settings.setValue("glProfile", 0);
             } else {
                 settings.setValue("autorun", true);
             }
@@ -706,6 +802,7 @@ initTools();
     highlightBuildButton( !(QSettings().value("autorun", true).toBool()) );
     setupScriptEngine();
     play();
+    }    
 }
 
 #ifdef USE_OPEN_EXR

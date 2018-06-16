@@ -2,6 +2,7 @@
 #include <QDialog>
 #include <QDebug>
 #include <QDialogButtonBox>
+#include <QMessageBox>
 // #include "MainWindow.h"
 #include "ui_PreferencesDialog.h"
 
@@ -30,6 +31,8 @@ namespace Fragmentarium {
           m_ui.exrBinPathsLineEdit->setText(settings.value("exrBinPaths", "bin;/usr/bin;").toString());
 #endif // USE_OPEN_EXR
           m_ui.stylesheetLineEdit->setText(settings.value("editorStylesheet", "font: 9pt Courier;").toString());
+          m_ui.glVersionComboBox->setCurrentIndex(settings.value("glVersion", 0).toInt());
+          m_ui.glProfileComboBox->setCurrentIndex(settings.value("glProfile", 0).toInt());
 	    };
             ~PreferencesDialog(){
 	    };
@@ -62,6 +65,19 @@ namespace Fragmentarium {
         settings.setValue("exrBinPaths", m_ui.exrBinPathsLineEdit->text());
 #endif // USE_OPEN_EXR
         settings.setValue("editorStylesheet", m_ui.stylesheetLineEdit->text());
+        // test for change and notify user a restart is required
+        
+        if(m_ui.glVersionComboBox->currentIndex() != settings.value("glVersion", 0).toInt()) {
+            QMessageBox::critical(0, tr("OpenGL version changed!"),
+                                  tr("Restart the program for changes to take effect!"));
+            settings.setValue("glVersion", m_ui.glVersionComboBox->currentIndex());
+        }
+        
+        if(m_ui.glProfileComboBox->currentIndex() != settings.value("glProfile", 0).toInt()) {
+            QMessageBox::critical(0, tr("OpenGL profile changed!"),
+                                  tr("Restart the program for changes to take effect!"));
+            settings.setValue("glProfile", m_ui.glProfileComboBox->currentIndex());
+        }
     }
 
     private:

@@ -90,6 +90,18 @@ int main(int argc, char *argv[])
                                         QString(""))
                     );
 
+    parser.addOption(QCommandLineOption( (QStringList() << QString("g") << QString("glversion")),
+                                         app.translate("main", "GL version to use for main display."),
+                                        QString("glversion"),
+                                        QString("4.1"))
+                    );
+
+    parser.addOption(QCommandLineOption( (QStringList() << QString("p") << QString("glprofile")),
+                                         app.translate("main", "GL Profile to use for main display.\nPossible values are 'compat', 'core', 'none'"),
+                                        QString("glprofile"),
+                                        QString("compat"))
+                    );
+
     // Process the actual command line arguments given by the user
     parser.process(app);
 
@@ -137,8 +149,37 @@ int main(int argc, char *argv[])
 //     }
 // #endif
 
-    Fragmentarium::GUI::MainWindow *mainWin;
+    if(parser.isSet(QString("glversion"))) {
+      QString glver = parser.value(QString("glversion"));
+          QSettings settings;
+            if ( glver == QString( "1.1" )) settings.setValue("glVersion", 1); else
+            if ( glver == QString( "1.2" )) settings.setValue("glVersion", 2); else
+            if ( glver == QString( "1.3" )) settings.setValue("glVersion", 3); else
+            if ( glver == QString( "1.4" )) settings.setValue("glVersion", 4); else
+            if ( glver == QString( "1.5" )) settings.setValue("glVersion", 5); else
+            if ( glver == QString( "2.0" )) settings.setValue("glVersion", 6); else
+            if ( glver == QString( "2.1" )) settings.setValue("glVersion", 7); else
+            // ES + 8 9 10 11 12
+            if ( glver == QString( "3.0" )) settings.setValue("glVersion", 13); else
+            if ( glver == QString( "3.1" )) settings.setValue("glVersion", 14); else
+            if ( glver == QString( "3.2" )) settings.setValue("glVersion", 15); else
+            if ( glver == QString( "3.3" )) settings.setValue("glVersion", 16); else
+            if ( glver == QString( "4.0" )) settings.setValue("glVersion", 17); else
+            if ( glver == QString( "4.1" )) settings.setValue("glVersion", 18); else
+            if ( glver == QString( "4.2" )) settings.setValue("glVersion", 19); else
+            if ( glver == QString( "4.3" )) settings.setValue("glVersion", 20); else
+        settings.setValue("glVersion", 0);
+    }
 
+    if(parser.isSet(QString("glprofile"))) {
+      QString glpro = parser.value(QString("glprofile"));
+        QSettings settings;
+        if ( glpro == QString( "compat" )) settings.setValue("glProfile", 2); else
+        if ( glpro == QString( "core" )) settings.setValue("glProfile", 1); else
+        settings.setValue("glProfile", 0);
+    }
+    
+    Fragmentarium::GUI::MainWindow *mainWin;
     mainWin = new Fragmentarium::GUI::MainWindow(&splash);
     splash.setMask(pixmap.mask());
     splash.show();

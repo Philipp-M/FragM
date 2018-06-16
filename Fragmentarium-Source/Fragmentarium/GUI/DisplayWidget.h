@@ -246,19 +246,12 @@ namespace Fragmentarium {
       QString cameraID() { return cameraControl->getID(); }
       
       bool init() {
-        #ifdef NVIDIAGL4PLUS
-        bool ret = initializeOpenGLFunctions();
-        #else
+#ifdef NVIDIAGL4PLUS
+        return initializeOpenGLFunctions();
+#else
         initializeOpenGLFunctions();
-        #endif // NVIDIAGL4PLUS
-        vendor = QString ( ( char * ) glGetString ( GL_VENDOR ) );
-        renderer = QString ( ( char * ) glGetString ( GL_RENDERER ) );
-        /// test for nVidia card and set the nV flag
-        foundnV = vendor.contains ( "NVIDIA", Qt::CaseInsensitive );
-        #ifndef NVIDIAGL4PLUS
-        bool ret = true;
-        #endif // NVIDIAGL4PLUS
-        return ret;
+        return context()->isValid();
+#endif // NVIDIAGL4PLUS
       };
 
 /// BEGIN 3DTexture

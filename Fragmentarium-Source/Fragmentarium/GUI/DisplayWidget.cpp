@@ -42,18 +42,20 @@ QStringList GetOpenGLFlags() {
     if ( f & QGLFormat::OpenGL_Version_1_5 ) s.append ( "1.5" );
     if ( f & QGLFormat::OpenGL_Version_2_0 ) s.append ( "2.0" );
     if ( f & QGLFormat::OpenGL_Version_2_1 ) s.append ( "2.1" );
+    if ( f & QGLFormat::OpenGL_ES_CommonLite_Version_1_0 ) s.append ( "ES Common Lite 1.0" );
+    if ( f & QGLFormat::OpenGL_ES_Common_Version_1_0 ) s.append ( "ES Common 1.0" );
+    if ( f & QGLFormat::OpenGL_ES_CommonLite_Version_1_1 ) s.append ( "ES Common Lite 1.1" );
+    if ( f & QGLFormat::OpenGL_ES_Common_Version_1_1 ) s.append ( "ES Common 1.1" );
+    if ( f & QGLFormat::OpenGL_ES_Version_2_0 ) s.append ( "ES_2,0" );
     if ( f & QGLFormat::OpenGL_Version_3_0 ) s.append ( "3.0" );
+    if ( f & QGLFormat::OpenGL_Version_3_1 ) s.append ( "3.1" );
     if ( f & QGLFormat::OpenGL_Version_3_2 ) s.append ( "3.2" );
     if ( f & QGLFormat::OpenGL_Version_3_3 ) s.append ( "3.3" );
     if ( f & QGLFormat::OpenGL_Version_4_0 ) s.append ( "4.0" );
     if ( f & QGLFormat::OpenGL_Version_4_1 ) s.append ( "4.1" );
     if ( f & QGLFormat::OpenGL_Version_4_2 ) s.append ( "4.2" );
     if ( f & QGLFormat::OpenGL_Version_4_3 ) s.append ( "4.3" );
-    if ( f & QGLFormat::OpenGL_ES_CommonLite_Version_1_0 ) s.append ( "ES_CL_1.0" );
-    if ( f & QGLFormat::OpenGL_ES_Common_Version_1_0 ) s.append ( "ES_C_1.0" );
-    if ( f & QGLFormat::OpenGL_ES_CommonLite_Version_1_1 ) s.append ( "ES_CL_1.1" );
-    if ( f & QGLFormat::OpenGL_ES_Common_Version_1_1 ) s.append ( "ES_C_1.1" );
-    if ( f & QGLFormat::OpenGL_ES_Version_2_0 ) s.append ( "ES_2,0" );
+    
     return s;
 }
 }
@@ -303,11 +305,12 @@ void DisplayWidget::setGlTexParameter ( QMap<QString, QString> map ) {
             if ( !ok ) wantedLevels = 128; // just an arbitrary small number, GL default = 1000
             glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, wantedLevels );
 
-#ifdef NVIDIAGL4PLUS
+// NVIDIAGL4PLUS
+if(context()->format().majorVersion() > 2)
             glGenerateMipmap ( GL_TEXTURE_2D ); //Generate mipmaps here!!!
-#else
+else
             glTexParameteri ( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE ); //Generate mipmaps here!!!
-#endif // NVIDIAGL4PLUS
+// NVIDIAGL4PLUS
 
             // read back and test our value
             glGetTexParameteriv ( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, &levels );
@@ -386,6 +389,9 @@ void DisplayWidget::setGlTexParameter ( QMap<QString, QString> map ) {
 #ifdef NVIDIAGL4PLUS
 // this function parses the assembler text and returns a string list containing the lines
 QStringList DisplayWidget::shaderAsm ( bool w ) {
+    
+    if(!foundnV) return QStringList("nVidia gfx card required for this feature!");
+    
     GLuint progId = w ? shaderProgram->programId() : bufferShaderProgram->programId();
     GLint formats = 0;
     glGetIntegerv ( GL_NUM_PROGRAM_BINARY_FORMATS, &formats );
@@ -1158,6 +1164,7 @@ void DisplayWidget::setShaderUniforms(QOpenGLShaderProgram* shaderProg) {
         glGetActiveUniform( programID, (GLuint)i, bufSize, &length, &size, &type, name);        
         QString uniformName = (char *)name;
         QString uniformValue = "internal fragment variable";
+        if(uniformName.startsWith("gl_")) uniformValue = "GL lib function";
         
         // find a value to go with the name index in the program may not be the same as index in our list
         for( int n=0; n < vw.count(); n++) {
@@ -1173,9 +1180,6 @@ void DisplayWidget::setShaderUniforms(QOpenGLShaderProgram* shaderProg) {
         QString tp;
         bool foundDouble = false;
 
- #ifdef NVIDIAGL4PLUS
-          double x,y,z,w;
-          GLuint index = glGetUniformLocation(programID, name);
           switch(type) {
 
                 case GL_BYTE:           tp = "BYTE "; foundDouble = false; break;
@@ -1201,6 +1205,12 @@ void DisplayWidget::setShaderUniforms(QOpenGLShaderProgram* shaderProg) {
                 case GL_FLOAT_MAT4:     tp = "FLOAT_MAT4"; foundDouble = false; break;
                 case GL_SAMPLER_2D:     tp = "SAMPLER_2D"; foundDouble = false; break;
                 case GL_SAMPLER_CUBE:   tp = "SAMPLER_CUBE"; foundDouble = false; break;
+            }
+#ifdef NVIDIAGL4PLUS
+if(context()->format().majorVersion() > 3 && context()->format().minorVersion() > 0) {
+          double x,y,z,w;
+          GLuint index = glGetUniformLocation(programID, name);
+          switch(type) {
                 case GL_DOUBLE:         tp = "DOUBLE"; foundDouble = true;
                 glUniform1d(index, uniformValue.toDouble());
                 break;
@@ -1234,6 +1244,7 @@ void DisplayWidget::setShaderUniforms(QOpenGLShaderProgram* shaderProg) {
                 default:
                 break;
             }
+}
 #endif // NVIDIAGL4PLUS
 
             // type name and value to console
@@ -1836,6 +1847,11 @@ void DisplayWidget::showEvent(QShowEvent * ) {
     INFO ( vendor + " " + renderer );
     INFO ( tr("This video card supports: ") + GetOpenGLFlags().join ( ", " ) );
 
+    // report the version and profile that was actually created in the engine
+    int prof = context()->format().profile();
+    INFO(QString("Using GL version %1.%2").arg(context()->format().majorVersion()).arg(context()->format().minorVersion()));
+    INFO(QString("Using GL profile %1").arg(prof==0 ? "None" : prof == 1 ? "Core" : prof == 2 ? "Compatability" : "oops") );
+    
     QStringList extensions;
 
     QList<QByteArray> a = QImageWriter::supportedImageFormats();

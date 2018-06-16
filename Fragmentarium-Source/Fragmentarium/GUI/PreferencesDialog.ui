@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>389</width>
-    <height>545</height>
+    <width>447</width>
+    <height>612</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -163,7 +163,7 @@
         <item>
          <widget class="QLineEdit" name="exrBinPathsLineEdit">
           <property name="text">
-           <string>/usr/bin;</string>
+           <string>bin;</string>
           </property>
          </widget>
         </item>
@@ -188,6 +188,158 @@
        </layout>
       </item>
       <item row="14" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QLabel" name="glVersionLabel">
+          <property name="text">
+           <string>OpenGL Version:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="glVersionComboBox">
+          <property name="toolTip">
+           <string/>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>Auto</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>1.1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>1.2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>1.3</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>1.4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>1.5</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2.0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2.1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ES CommonLite 1.0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ES Common 1.0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ES CommonLite 1.1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ES Common 1.1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ES 2.0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>3.0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>3.1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>3.2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>3.3</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4.0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4.1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4.2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4.3</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Profile:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="glProfileComboBox">
+          <item>
+           <property name="text">
+            <string>Auto</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Core</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Compatibility</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="15" column="0">
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
